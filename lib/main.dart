@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'firebase_options.dart';
@@ -10,8 +11,13 @@ import 'services/theme_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  MobileAds.instance.initialize();
-  await ThemeService.load();
+  // google_mobile_ads has no web implementation.
+  if (!kIsWeb) {
+    MobileAds.instance.initialize();
+  }
+  // Not awaited: the UI starts with the default theme and reacts once the
+  // saved preference loads, rather than blocking app boot on local storage.
+  ThemeService.load();
   runApp(const OhThePlacesIveBeenApp());
 }
 

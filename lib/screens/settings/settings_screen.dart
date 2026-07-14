@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/app_user.dart';
 import '../../services/auth_service.dart';
+import '../../services/theme_service.dart';
 import '../../services/user_service.dart';
 import '../auth/sign_in_screen.dart';
 
@@ -24,7 +25,8 @@ class SettingsScreen extends StatelessWidget {
                     SwitchListTile(
                       title: const Text('Private account'),
                       subtitle: const Text(
-                          'When on, only approved followers can see your visited places'),
+                        'When on, only approved followers can see your visited places',
+                      ),
                       value: user.isPrivate,
                       onChanged: (value) => UserService.createUserProfile(
                         AppUser(
@@ -40,6 +42,48 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Theme'),
+                          const SizedBox(height: 8),
+                          ValueListenableBuilder<ThemeMode>(
+                            valueListenable: ThemeService.themeMode,
+                            builder: (context, mode, _) {
+                              return SegmentedButton<ThemeMode>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: ThemeMode.system,
+                                    icon: Icon(Icons.brightness_auto),
+                                    label: Text('Auto'),
+                                  ),
+                                  ButtonSegment(
+                                    value: ThemeMode.light,
+                                    icon: Icon(Icons.light_mode),
+                                    label: Text('Light'),
+                                  ),
+                                  ButtonSegment(
+                                    value: ThemeMode.dark,
+                                    icon: Icon(Icons.dark_mode),
+                                    label: Text('Dark'),
+                                  ),
+                                ],
+                                selected: {mode},
+                                showSelectedIcon: false,
+                                onSelectionChanged: (selected) =>
+                                    ThemeService.setThemeMode(selected.first),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(),
                     ListTile(
                       title: const Text('Log out'),
                       leading: const Icon(Icons.logout),
@@ -47,7 +91,9 @@ class SettingsScreen extends StatelessWidget {
                         await AuthService.signOut();
                         if (context.mounted) {
                           Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const SignInScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const SignInScreen(),
+                            ),
                             (route) => false,
                           );
                         }

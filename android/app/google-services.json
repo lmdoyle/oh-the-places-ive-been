@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "525029509867-17briouapmcvf3bh3tiqb9ei07lgodha.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gamerguytv.oh_the_places_ive_been",
+            "certificate_hash": "08877d1a1e2bcfafe9f439def7065d8913fdc6d3"
+          }
+        },
+        {
+          "client_id": "525029509867-gd38aa4jt9pag5mqkroqiu257tku30g1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gamerguytv.oh_the_places_ive_been",
+            "certificate_hash": "4e9f9a4c4f8d3477d35b1b49dc8d1b1dc51373f0"
+          }
+        },
+        {
           "client_id": "525029509867-kb8caon54kmge8uiqpra7q8ei0bmotgp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

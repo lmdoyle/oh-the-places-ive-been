@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +10,7 @@ import '../../services/cloudinary_service.dart';
 import '../../services/geocoding_service.dart';
 import '../../services/visit_service.dart';
 import '../../widgets/star_rating.dart';
+import '../../widgets/xfile_thumbnail.dart';
 
 class AddVisitScreen extends StatefulWidget {
   const AddVisitScreen({super.key});
@@ -38,8 +38,10 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       final languageCode = Localizations.localeOf(context).languageCode;
-      final results =
-          await GeocodingService.search(query, languageCode: languageCode);
+      final results = await GeocodingService.search(
+        query,
+        languageCode: languageCode,
+      );
       if (!mounted) return;
       setState(() {
         _selectedPlace = null;
@@ -47,7 +49,9 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
       });
       if (results.isNotEmpty) {
         _mapController.move(
-            LatLng(results.first.latitude, results.first.longitude), 10);
+          LatLng(results.first.latitude, results.first.longitude),
+          10,
+        );
       }
     });
   }
@@ -83,22 +87,24 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final visitId = await VisitService.addVisit(Visit(
-        id: '',
-        userId: userId,
-        placeName: place.placeName,
-        country: place.country,
-        state: place.state,
-        latitude: place.latitude,
-        longitude: place.longitude,
-        visitedFrom: _visitedRange?.start,
-        visitedTo: _visitedRange?.end,
-        rating: _rating > 0 ? _rating : null,
-        comment: _commentController.text.trim().isEmpty
-            ? null
-            : _commentController.text.trim(),
-        createdAt: DateTime.now(),
-      ));
+      final visitId = await VisitService.addVisit(
+        Visit(
+          id: '',
+          userId: userId,
+          placeName: place.placeName,
+          country: place.country,
+          state: place.state,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          visitedFrom: _visitedRange?.start,
+          visitedTo: _visitedRange?.end,
+          rating: _rating > 0 ? _rating : null,
+          comment: _commentController.text.trim().isEmpty
+              ? null
+              : _commentController.text.trim(),
+          createdAt: DateTime.now(),
+        ),
+      );
 
       if (_photos.isNotEmpty) {
         final urls = await CloudinaryService.uploadImages(_photos);
@@ -132,16 +138,24 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                   userAgentPackageName: 'com.gamerguytv.oh_the_places_ive_been',
                 ),
                 if (markerPlace != null)
-                  MarkerLayer(markers: [
-                    Marker(
-                      point: LatLng(markerPlace.latitude, markerPlace.longitude),
-                      width: 36,
-                      height: 36,
-                      alignment: Alignment.topCenter,
-                      child: const Icon(Icons.location_pin,
-                          color: Colors.red, size: 36),
-                    ),
-                  ]),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(
+                          markerPlace.latitude,
+                          markerPlace.longitude,
+                        ),
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.topCenter,
+                        child: const Icon(
+                          Icons.location_pin,
+                          color: Colors.red,
+                          size: 36,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -159,10 +173,12 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                   onChanged: _onSearchChanged,
                 ),
                 if (_selectedPlace == null)
-                  ..._results.map((r) => ListTile(
-                        title: Text(r.displayName),
-                        onTap: () => _selectPlace(r),
-                      )),
+                  ..._results.map(
+                    (r) => ListTile(
+                      title: Text(r.displayName),
+                      onTap: () => _selectPlace(r),
+                    ),
+                  ),
                 if (_selectedPlace != null) ...[
                   const SizedBox(height: 16),
                   Row(
@@ -172,7 +188,7 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                           _visitedRange == null
                               ? 'No dates set'
                               : '${DateFormat.yMMMd().format(_visitedRange!.start)} – '
-                                  '${DateFormat.yMMMd().format(_visitedRange!.end)}',
+                                    '${DateFormat.yMMMd().format(_visitedRange!.end)}',
                         ),
                       ),
                       TextButton(
@@ -183,7 +199,9 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                   ),
                   const SizedBox(height: 8),
                   StarRating(
-                      rating: _rating, onChanged: (r) => setState(() => _rating = r)),
+                    rating: _rating,
+                    onChanged: (r) => setState(() => _rating = r),
+                  ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _commentController,
@@ -194,11 +212,12 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                   Wrap(
                     spacing: 8,
                     children: [
-                      ..._photos.map((p) => ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.file(File(p.path),
-                                width: 72, height: 72, fit: BoxFit.cover),
-                          )),
+                      ..._photos.map(
+                        (p) => ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: XFileThumbnail(file: p),
+                        ),
+                      ),
                       InkWell(
                         onTap: _pickPhotos,
                         child: Container(

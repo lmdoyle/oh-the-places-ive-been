@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +6,7 @@ import '../../models/visit.dart';
 import '../../services/cloudinary_service.dart';
 import '../../services/visit_service.dart';
 import '../../widgets/star_rating.dart';
+import '../../widgets/xfile_thumbnail.dart';
 
 class EditVisitScreen extends StatefulWidget {
   final Visit visit;
@@ -72,10 +72,50 @@ class _EditVisitScreenState extends State<EditVisitScreen> {
     }
   }
 
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete ${widget.visit.placeName}?'),
+        content: const Text(
+          "This can't be undone — the visit, its photos, likes, and comments will all be gone.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await VisitService.deleteVisit(widget.visit.id);
+    if (mounted) {
+      // Pop both this screen and the place detail screen behind it, since
+      // that visit no longer exists.
+      Navigator.of(context)
+        ..pop()
+        ..pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit ${widget.visit.placeName}')),
+      appBar: AppBar(
+        title: Text('Edit ${widget.visit.placeName}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _confirmDelete,
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -148,12 +188,7 @@ class _EditVisitScreenState extends State<EditVisitScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image.file(
-                        File(p.path),
-                        width: 72,
-                        height: 72,
-                        fit: BoxFit.cover,
-                      ),
+                      child: XFileThumbnail(file: p),
                     ),
                     Positioned(
                       top: 2,

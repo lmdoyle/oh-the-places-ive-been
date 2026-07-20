@@ -13,12 +13,29 @@ class VisitService {
     return doc.id;
   }
 
+  // Deleting a document doesn't cascade to its subcollections in Firestore,
+  // so likes/comments have to be cleaned up explicitly or they'd be
+  // orphaned (harmless, but a permanent storage leak).
   static Future<void> deleteVisit(String visitId) async {
-    await _visits.doc(visitId).delete();
+    final visitRef = _visits.doc(visitId);
+    final likes = await visitRef.collection('likes').get();
+    final comments = await visitRef.collection('comments').get();
+
+    final batch = _db.batch();
+    for (final doc in likes.docs) {
+      batch.delete(doc.reference);
+    }
+    for (final doc in comments.docs) {
+      batch.delete(doc.reference);
+    }
+    batch.delete(visitRef);
+    await batch.commit();
   }
 
   static Future<void> updateVisit(
-      String visitId, Map<String, dynamic> updates) async {
+    String visitId,
+    Map<String, dynamic> updates,
+  ) async {
     await _visits.doc(visitId).update(updates);
   }
 
@@ -26,8 +43,9 @@ class VisitService {
   // composite index (userId equality + createdAt order) set up in Firestore.
   static Stream<List<Visit>> visitsForUser(String userId) {
     return _visits.where('userId', isEqualTo: userId).snapshots().map((snap) {
-      final visits =
-          snap.docs.map((d) => Visit.fromMap(d.id, d.data())).toList();
+      final visits = snap.docs
+          .map((d) => Visit.fromMap(d.id, d.data()))
+          .toList();
       visits.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return visits;
     });
@@ -98,8 +116,10 @@ class VisitService {
         .collection('comments')
         .orderBy('createdAt')
         .snapshots()
-        .map((snap) => snap.docs
-            .map((d) => VisitComment.fromMap(d.id, d.data()))
-            .toList());
+        .map(
+          (snap) => snap.docs
+              .map((d) => VisitComment.fromMap(d.id, d.data()))
+              .toList(),
+        );
   }
 }

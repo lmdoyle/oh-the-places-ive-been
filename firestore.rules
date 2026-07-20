@@ -33,16 +33,24 @@ service cloud.firestore {
       allow update: if isSignedIn();
       allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
 
+      // Deleting a visit also needs to clean up other users' likes/comments
+      // on it, so the visit's owner can delete those docs too, not just
+      // each doc's own author.
+      function isVisitOwner() {
+        return isSignedIn() &&
+            request.auth.uid == get(/databases/$(database)/documents/visits/$(visitId)).data.userId;
+      }
+
       match /likes/{userId} {
         allow read: if true;
-        allow write: if isSignedIn() && request.auth.uid == userId;
+        allow write: if isSignedIn() && (request.auth.uid == userId || isVisitOwner());
       }
 
       match /comments/{commentId} {
         allow read: if true;
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
         allow update: if isSignedIn();
-        allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isVisitOwner());
       }
     }
 

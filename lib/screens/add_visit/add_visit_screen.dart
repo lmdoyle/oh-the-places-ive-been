@@ -112,6 +112,12 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
       }
 
       if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }

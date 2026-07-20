@@ -1,6 +1,6 @@
 {
-    "name": "oh_the_places_ive_been",
-    "short_name": "oh_the_places_ive_been",
+    "name": "Oh the Places I've Been",
+    "short_name": "Oh the Places I've Been",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="oh_the_places_ive_been"
+        android:label="Oh the Places I've Been"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

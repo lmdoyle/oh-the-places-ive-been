@@ -40,7 +40,7 @@ Travel & Local
 leodoyle05@gmail.com
 
 ## Privacy Policy URL
-https://lmdoyle.github.io/oh-the-places-ive-been/privacy.html
+(use your own existing privacy policy URL here)
 
 ---
 
@@ -52,5 +52,4 @@ https://lmdoyle.github.io/oh-the-places-ive-been/privacy.html
       rating)
 - [ ] Data Safety form — declare: email, location (user-entered, not
       device GPS), photos, and that data is shared with other users when
-      your profile is public. See privacy.html for the full breakdown to
-      reference while filling this out.
+      your profile is public.

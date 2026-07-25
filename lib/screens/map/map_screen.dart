@@ -69,13 +69,8 @@ class MapScreen extends StatelessWidget {
                       ),
                       children: [
                         TileLayer(
-                          // Wikimedia's "osm-intl" tiles use the same OSM
-                          // data as the standard tile server, but render
-                          // labels in the international/English name where
-                          // one exists, instead of always the local
-                          // language (e.g. "Italy" instead of "Italia").
                           urlTemplate:
-                              'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName:
                               'com.gamerguytv.oh_the_places_ive_been',
                         ),

@@ -140,12 +140,7 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
               ),
               children: [
                 TileLayer(
-                  // Wikimedia's "osm-intl" tiles use the same OSM data as
-                  // the standard tile server, but render labels in the
-                  // international/English name where one exists, instead
-                  // of always the local language.
-                  urlTemplate:
-                      'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.gamerguytv.oh_the_places_ive_been',
                 ),
                 if (markerPlace != null)

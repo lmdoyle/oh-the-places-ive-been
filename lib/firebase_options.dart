@@ -17,13 +17,16 @@ class DefaultFirebaseOptions {
     }
   }
 
+  // Supplied at build time via --dart-define-from-file so the web project's
+  // Firebase config doesn't sit in plaintext in the public GitHub repo. See
+  // web_secrets.example.json for the expected keys.
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA5Dzl0YVwwmXZTJK7uFRUCIm8gNLS-g9w',
-    appId: '1:525029509867:web:f2cba8464e55663c0b4cae',
-    messagingSenderId: '525029509867',
-    projectId: 'oh-the-places-ive-been',
-    authDomain: 'oh-the-places-ive-been.firebaseapp.com',
-    storageBucket: 'oh-the-places-ive-been.firebasestorage.app',
+    apiKey: String.fromEnvironment('FIREBASE_WEB_API_KEY'),
+    appId: String.fromEnvironment('FIREBASE_WEB_APP_ID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID'),
+    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
   );
 
   static const FirebaseOptions android = FirebaseOptions(

@@ -1,9 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   static final _auth = FirebaseAuth.instance;
-  static final _googleSignIn = GoogleSignIn();
+  // Passed explicitly (rather than via the index.html meta tag) so the web
+  // client ID doesn't sit in plaintext in the public GitHub repo — supplied
+  // at build time via --dart-define-from-file. Only relevant on web; native
+  // Google Sign-In uses the SHA fingerprint registered against
+  // google-services.json instead, so this is left unset elsewhere.
+  static final _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb
+        ? const String.fromEnvironment('GOOGLE_SIGNIN_CLIENT_ID')
+        : null,
+  );
 
   static User? get currentUser => _auth.currentUser;
   static Stream<User?> get userStream => _auth.authStateChanges();

@@ -7,17 +7,31 @@ class TravelStats extends StatelessWidget {
 
   const TravelStats({super.key, required this.visits});
 
+  // Nominatim's "state" field is just OSM's admin_level=4 tag, which plenty
+  // of non-US countries also populate (German Bundesländer, Mexican
+  // estados, Australian states, etc.) — so the "States" stat only makes
+  // sense scoped to the US, not any visit that happens to have a state.
+  static const _usAliases = {
+    'united states',
+    'united states of america',
+    'usa',
+    'us',
+  };
+
   @override
   Widget build(BuildContext context) {
     final countries = visits
         .map((v) => v.country)
         .where((c) => c.isNotEmpty)
         .toSet();
-    // Keyed by state+country so identically-named states in different
-    // countries (rare, but possible) aren't counted as one.
     final states = visits
-        .where((v) => v.state != null && v.state!.isNotEmpty)
-        .map((v) => '${v.state}|${v.country}')
+        .where(
+          (v) =>
+              v.state != null &&
+              v.state!.isNotEmpty &&
+              _usAliases.contains(v.country.trim().toLowerCase()),
+        )
+        .map((v) => v.state!)
         .toSet();
     final continents = countries
         .map(ContinentService.continentForCountry)

@@ -1,3 +1,7 @@
+# Web build secrets (Firebase web config, Google Sign-In client ID) — kept
+# out of the public repo. See web_secrets.example.json for the template.
+web_secrets.json
+
 # Miscellaneous
 *.class
 *.log

@@ -5,7 +5,9 @@ import '../../models/visit.dart';
 import '../../services/auth_service.dart';
 import '../../services/feed_service.dart';
 import '../../services/user_service.dart';
+import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
+import '../../widgets/horizontal_trip_timeline.dart';
 import '../../widgets/visit_card.dart';
 import '../place/place_detail_screen.dart';
 import '../profile/other_profile_screen.dart';
@@ -36,79 +38,112 @@ class FeedScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Feed')),
       body: userId == null
           ? const Center(child: Text('Sign in to see your feed'))
-          : StreamBuilder<List<Visit>>(
-              stream: FeedService.feedForUser(userId),
-              builder: (context, visitSnap) {
-                return StreamBuilder<List<FollowEvent>>(
-                  stream: UserService.followerEvents(userId),
-                  builder: (context, followSnap) {
-                    if (visitSnap.hasError || followSnap.hasError) {
-                      return Center(
-                        child: Text(
-                          'Error: ${visitSnap.error ?? followSnap.error}',
-                        ),
-                      );
-                    }
-
-                    final items = <_FeedItem>[
-                      ...(visitSnap.data ?? []).map(_FeedItem.visit),
-                      ...(followSnap.data ?? []).map(_FeedItem.follow),
-                    ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-                    if (items.isEmpty) {
-                      return const Center(
-                        child: Text('Follow people to see their places here'),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: items.length,
-                      itemBuilder: (context, i) {
-                        final item = items[i];
-                        if (item.visit != null) {
-                          return VisitCard(
-                            visit: item.visit!,
-                            showAuthor: true,
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    PlaceDetailScreen(visitId: item.visit!.id),
-                              ),
-                            ),
-                          );
-                        }
-                        final event = item.followEvent!;
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: event.followerPhotoUrl != null
-                                ? NetworkImage(event.followerPhotoUrl!)
-                                : null,
-                            child: event.followerPhotoUrl == null
-                                ? const Icon(Icons.person_add)
-                                : null,
-                          ),
-                          title: Text(
-                            '${event.followerName} started following you',
-                          ),
-                          subtitle: Text(
-                            DateFormat.yMMMd().format(event.createdAt),
-                          ),
-                          onTap: () => Navigator.push(
+          : Column(
+              children: [
+                StreamBuilder<List<Visit>>(
+                  stream: VisitService.visitsForUser(userId),
+                  builder: (context, ownVisitsSnap) {
+                    final ownVisits = ownVisitsSnap.data ?? [];
+                    if (ownVisits.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      children: [
+                        HorizontalTripTimeline(
+                          visits: ownVisits,
+                          onTap: (visit) => Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  OtherProfileScreen(uid: event.followerId),
+                                  PlaceDetailScreen(visitId: visit.id),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        const Divider(height: 1),
+                      ],
                     );
                   },
-                );
-              },
+                ),
+                Expanded(child: _FeedList(userId: userId)),
+              ],
             ),
       bottomNavigationBar: const AdBanner(),
+    );
+  }
+}
+
+// The friends'-activity list (visits + new-follower events), split out from
+// FeedScreen so it can sit in an Expanded below the horizontal trip strip.
+class _FeedList extends StatelessWidget {
+  final String userId;
+
+  const _FeedList({required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Visit>>(
+      stream: FeedService.feedForUser(userId),
+      builder: (context, visitSnap) {
+        return StreamBuilder<List<FollowEvent>>(
+          stream: UserService.followerEvents(userId),
+          builder: (context, followSnap) {
+            if (visitSnap.hasError || followSnap.hasError) {
+              return Center(
+                child: Text('Error: ${visitSnap.error ?? followSnap.error}'),
+              );
+            }
+
+            final items = <_FeedItem>[
+              ...(visitSnap.data ?? []).map(_FeedItem.visit),
+              ...(followSnap.data ?? []).map(_FeedItem.follow),
+            ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+            if (items.isEmpty) {
+              return const Center(
+                child: Text('Follow people to see their places here'),
+              );
+            }
+
+            return ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, i) {
+                final item = items[i];
+                if (item.visit != null) {
+                  return VisitCard(
+                    visit: item.visit!,
+                    showAuthor: true,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            PlaceDetailScreen(visitId: item.visit!.id),
+                      ),
+                    ),
+                  );
+                }
+                final event = item.followEvent!;
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: event.followerPhotoUrl != null
+                        ? NetworkImage(event.followerPhotoUrl!)
+                        : null,
+                    child: event.followerPhotoUrl == null
+                        ? const Icon(Icons.person_add)
+                        : null,
+                  ),
+                  title: Text('${event.followerName} started following you'),
+                  subtitle: Text(DateFormat.yMMMd().format(event.createdAt)),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          OtherProfileScreen(uid: event.followerId),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

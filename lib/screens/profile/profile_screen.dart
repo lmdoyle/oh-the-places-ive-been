@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
+import '../../widgets/horizontal_trip_timeline.dart';
 import '../../widgets/travel_stats.dart';
 import '../../widgets/visit_timeline.dart';
 import '../notifications/notifications_screen.dart';
@@ -120,7 +121,18 @@ class ProfileScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 4),
+                        HorizontalTripTimeline(
+                          visits: visits,
+                          onTap: (visit) => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  PlaceDetailScreen(visitId: visit.id),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         TravelStats(visits: visits),
                       ],
                     ),

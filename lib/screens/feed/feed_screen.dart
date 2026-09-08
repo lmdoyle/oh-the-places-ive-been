@@ -5,9 +5,7 @@ import '../../models/visit.dart';
 import '../../services/auth_service.dart';
 import '../../services/feed_service.dart';
 import '../../services/user_service.dart';
-import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
-import '../../widgets/horizontal_trip_timeline.dart';
 import '../../widgets/visit_card.dart';
 import '../place/place_detail_screen.dart';
 import '../profile/other_profile_screen.dart';
@@ -38,33 +36,7 @@ class FeedScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Feed')),
       body: userId == null
           ? const Center(child: Text('Sign in to see your feed'))
-          : Column(
-              children: [
-                StreamBuilder<List<Visit>>(
-                  stream: VisitService.visitsForUser(userId),
-                  builder: (context, ownVisitsSnap) {
-                    final ownVisits = ownVisitsSnap.data ?? [];
-                    if (ownVisits.isEmpty) return const SizedBox.shrink();
-                    return Column(
-                      children: [
-                        HorizontalTripTimeline(
-                          visits: ownVisits,
-                          onTap: (visit) => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  PlaceDetailScreen(visitId: visit.id),
-                            ),
-                          ),
-                        ),
-                        const Divider(height: 1),
-                      ],
-                    );
-                  },
-                ),
-                Expanded(child: _FeedList(userId: userId)),
-              ],
-            ),
+          : _FeedList(userId: userId),
       bottomNavigationBar: const AdBanner(),
     );
   }

@@ -6,7 +6,7 @@ import '../../services/user_service.dart';
 import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/travel_stats.dart';
-import '../../widgets/visit_card.dart';
+import '../../widgets/visit_timeline.dart';
 import '../notifications/notifications_screen.dart';
 import '../place/place_detail_screen.dart';
 import '../settings/settings_screen.dart';
@@ -129,16 +129,13 @@ class ProfileScreen extends StatelessWidget {
                   Expanded(
                     child: visits.isEmpty
                         ? const Center(child: Text('No places yet'))
-                        : ListView.builder(
-                            itemCount: visits.length,
-                            itemBuilder: (context, i) => VisitCard(
-                              visit: visits[i],
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      PlaceDetailScreen(visitId: visits[i].id),
-                                ),
+                        : VisitTimeline(
+                            visits: visits,
+                            onTap: (visit) => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    PlaceDetailScreen(visitId: visit.id),
                               ),
                             ),
                           ),

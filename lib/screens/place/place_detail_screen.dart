@@ -48,7 +48,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         card: TripShareCard(visit: visit),
                         fileName:
                             '${visit.placeName.replaceAll(' ', '_')}_trip.png',
-                        imageUrlsToPreload: TripShareCard.collagePhotoUrls(
+                        imageUrlsToPreload: TripShareCard.backgroundPhotoUrls(
                           visit,
                         ),
                         shareText:

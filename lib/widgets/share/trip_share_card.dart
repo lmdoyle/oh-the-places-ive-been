@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/visit.dart';
 import '../star_rating.dart';
-import 'photo_collage.dart';
+import 'photo_grid_background.dart';
 import 'share_card_frame.dart';
 
 class TripShareCard extends StatelessWidget {
@@ -9,17 +9,38 @@ class TripShareCard extends StatelessWidget {
 
   const TripShareCard({super.key, required this.visit});
 
-  static List<String> collagePhotoUrls(Visit visit) {
-    return visit.photoUrls.take(PhotoCollage.maxPhotos).toList();
+  // Same idea as ProfileShareCard's background — every photo tiled into a
+  // mosaic rather than a curated few, capped well below "every photo this
+  // trip has" so the preview isn't precaching dozens of images before
+  // Share becomes usable.
+  static const maxBackgroundPhotos = 24;
+
+  static List<String> backgroundPhotoUrls(Visit visit) {
+    return visit.photoUrls.take(maxBackgroundPhotos).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final photoUrls = backgroundPhotoUrls(visit);
+
     return ShareCardFrame(
+      background: photoUrls.isEmpty
+          ? null
+          : PhotoGridBackground(photoUrls: photoUrls),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: PhotoCollage(photoUrls: collagePhotoUrls(visit))),
+          if (photoUrls.isEmpty)
+            const Expanded(
+              child: Center(
+                child: Icon(
+                  Icons.photo_camera_outlined,
+                  color: Colors.white38,
+                  size: 56,
+                ),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
             child: Column(

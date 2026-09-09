@@ -35,15 +35,20 @@ class _ShareCardPreviewScreenState extends State<ShareCardPreviewScreen> {
   }
 
   Future<void> _preload() async {
-    for (final url in widget.imageUrlsToPreload) {
-      try {
-        await precacheImage(NetworkImage(url), context);
-      } catch (_) {
-        // A broken or slow-loading photo shouldn't block sharing the rest
-        // of the card — it'll just render as whatever placeholder the
-        // image widget shows on error.
-      }
-    }
+    // In parallel — some cards (the profile mosaic) preload up to two
+    // dozen photos, and loading those one at a time would make Share sit
+    // behind a long wait for no reason.
+    await Future.wait(
+      widget.imageUrlsToPreload.map((url) async {
+        try {
+          await precacheImage(NetworkImage(url), context);
+        } catch (_) {
+          // A broken or slow-loading photo shouldn't block sharing the
+          // rest of the card — it'll just render as whatever placeholder
+          // the image widget shows on error.
+        }
+      }),
+    );
     if (mounted) setState(() => _isReady = true);
   }
 

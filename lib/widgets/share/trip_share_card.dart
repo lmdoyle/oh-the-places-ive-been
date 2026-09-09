@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../models/visit.dart';
 import '../star_rating.dart';
+import 'photo_collage.dart';
 import 'share_card_frame.dart';
 
 class TripShareCard extends StatelessWidget {
@@ -9,29 +9,19 @@ class TripShareCard extends StatelessWidget {
 
   const TripShareCard({super.key, required this.visit});
 
+  static const maxCollagePhotos = 4;
+
+  static List<String> collagePhotoUrls(Visit visit) {
+    return visit.photoUrls.take(maxCollagePhotos).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ShareCardFrame(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (visit.photoUrls.isNotEmpty)
-            Expanded(
-              child: CachedNetworkImage(
-                imageUrl: visit.photoUrls.first,
-                fit: BoxFit.cover,
-              ),
-            )
-          else
-            const Expanded(
-              child: Center(
-                child: Icon(
-                  Icons.photo_camera_outlined,
-                  color: Colors.white38,
-                  size: 56,
-                ),
-              ),
-            ),
+          Expanded(child: PhotoCollage(photoUrls: collagePhotoUrls(visit))),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
             child: Column(

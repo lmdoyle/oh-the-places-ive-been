@@ -166,9 +166,12 @@ class ProfileScreen extends StatelessWidget {
                                   visits: visits,
                                 ),
                                 fileName: 'my_travel_footprint.png',
-                                imageUrlsToPreload: user.photoUrl != null
-                                    ? [user.photoUrl!]
-                                    : const [],
+                                imageUrlsToPreload: [
+                                  if (user.photoUrl != null) user.photoUrl!,
+                                  ...ProfileShareCard.backgroundPhotoUrls(
+                                    visits,
+                                  ),
+                                ],
                                 shareText: 'My travel footprint so far!',
                               ),
                             ),

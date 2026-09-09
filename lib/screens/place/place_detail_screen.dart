@@ -48,9 +48,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         card: TripShareCard(visit: visit),
                         fileName:
                             '${visit.placeName.replaceAll(' ', '_')}_trip.png',
-                        imageUrlsToPreload: visit.photoUrls.isNotEmpty
-                            ? [visit.photoUrls.first]
-                            : const [],
+                        imageUrlsToPreload: TripShareCard.collagePhotoUrls(
+                          visit,
+                        ),
                         shareText:
                             'I visited ${visit.placeName}, ${visit.country}!',
                       ),

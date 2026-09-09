@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/app_user.dart';
 import '../../models/travel_stats_data.dart';
 import '../../models/visit.dart';
+import 'photo_grid_background.dart';
 import 'share_card_frame.dart';
 
 class ProfileShareCard extends StatelessWidget {
@@ -11,11 +12,21 @@ class ProfileShareCard extends StatelessWidget {
 
   const ProfileShareCard({super.key, required this.user, required this.visits});
 
+  // Capped well below "every photo the user's ever uploaded" — plenty to
+  // fill the mosaic densely, without the preview screen having to precache
+  // dozens of images before Share becomes usable.
+  static const maxBackgroundPhotos = 24;
+
+  static List<String> backgroundPhotoUrls(List<Visit> visits) {
+    return visits.expand((v) => v.photoUrls).take(maxBackgroundPhotos).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final stats = TravelStatsData.compute(visits);
 
     return ShareCardFrame(
+      background: PhotoGridBackground(photoUrls: backgroundPhotoUrls(visits)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(

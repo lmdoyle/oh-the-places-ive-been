@@ -6,7 +6,7 @@ import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/horizontal_trip_timeline.dart';
 import '../../widgets/travel_stats.dart';
-import '../../widgets/visit_timeline.dart';
+import '../../widgets/visit_card.dart';
 import '../place/place_detail_screen.dart';
 import 'follow_list_screen.dart';
 
@@ -141,13 +141,16 @@ class OtherProfileScreen extends StatelessWidget {
                   Expanded(
                     child: visits.isEmpty
                         ? const Center(child: Text('No places yet'))
-                        : VisitTimeline(
-                            visits: visits,
-                            onTap: (visit) => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    PlaceDetailScreen(visitId: visit.id),
+                        : ListView.builder(
+                            itemCount: visits.length,
+                            itemBuilder: (context, i) => VisitCard(
+                              visit: visits[i],
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      PlaceDetailScreen(visitId: visits[i].id),
+                                ),
                               ),
                             ),
                           ),

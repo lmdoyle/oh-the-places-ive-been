@@ -9,8 +9,10 @@ import '../../services/user_service.dart';
 import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/star_rating.dart';
+import '../../widgets/share/trip_share_card.dart';
 import '../profile/other_profile_screen.dart';
 import '../report/report_sheet.dart';
+import '../share/share_card_preview_screen.dart';
 import 'edit_visit_screen.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
@@ -36,6 +38,25 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         return Scaffold(
           appBar: AppBar(
             actions: [
+              if (visit != null)
+                IconButton(
+                  icon: const Icon(Icons.ios_share),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ShareCardPreviewScreen(
+                        card: TripShareCard(visit: visit),
+                        fileName:
+                            '${visit.placeName.replaceAll(' ', '_')}_trip.png',
+                        imageUrlsToPreload: visit.photoUrls.isNotEmpty
+                            ? [visit.photoUrls.first]
+                            : const [],
+                        shareText:
+                            'I visited ${visit.placeName}, ${visit.country}!',
+                      ),
+                    ),
+                  ),
+                ),
               if (isOwner)
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),

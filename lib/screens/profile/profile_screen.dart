@@ -6,11 +6,14 @@ import '../../services/user_service.dart';
 import '../../services/visit_service.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/horizontal_trip_timeline.dart';
+import '../../widgets/share/profile_share_card.dart';
+import '../../widgets/share/year_share_card.dart';
 import '../../widgets/travel_stats.dart';
 import '../../widgets/visit_card.dart';
 import '../notifications/notifications_screen.dart';
 import '../place/place_detail_screen.dart';
 import '../settings/settings_screen.dart';
+import '../share/share_card_preview_screen.dart';
 import 'follow_list_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -131,9 +134,48 @@ class ProfileScreen extends StatelessWidget {
                                   PlaceDetailScreen(visitId: visit.id),
                             ),
                           ),
+                          onYearTap: (year) {
+                            final visitsInYear = visits
+                                .where((v) => v.visitedFrom?.year == year)
+                                .toList();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ShareCardPreviewScreen(
+                                  card: YearShareCard(
+                                    year: year,
+                                    visitsInYear: visitsInYear,
+                                  ),
+                                  fileName: '${year}_travel_recap.png',
+                                  shareText: 'My $year in travel!',
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 8),
                         TravelStats(visits: visits),
+                        const SizedBox(height: 4),
+                        TextButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ShareCardPreviewScreen(
+                                card: ProfileShareCard(
+                                  user: user,
+                                  visits: visits,
+                                ),
+                                fileName: 'my_travel_footprint.png',
+                                imageUrlsToPreload: user.photoUrl != null
+                                    ? [user.photoUrl!]
+                                    : const [],
+                                shareText: 'My travel footprint so far!',
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(Icons.ios_share, size: 16),
+                          label: const Text('Share profile'),
+                        ),
                       ],
                     ),
                   ),

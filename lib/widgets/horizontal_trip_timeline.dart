@@ -9,16 +9,17 @@ import '../models/visit.dart';
 class HorizontalTripTimeline extends StatefulWidget {
   final List<Visit> visits;
   final void Function(Visit visit) onTap;
+  final void Function(int year)? onYearTap;
 
   const HorizontalTripTimeline({
     super.key,
     required this.visits,
     required this.onTap,
+    this.onYearTap,
   });
 
   @override
-  State<HorizontalTripTimeline> createState() =>
-      _HorizontalTripTimelineState();
+  State<HorizontalTripTimeline> createState() => _HorizontalTripTimelineState();
 }
 
 class _HorizontalTripTimelineState extends State<HorizontalTripTimeline> {
@@ -74,6 +75,9 @@ class _HorizontalTripTimelineState extends State<HorizontalTripTimeline> {
             isLast: i == dated.length - 1,
             showYear: isNewYear,
             onTap: () => widget.onTap(visit),
+            onYearTap: widget.onYearTap == null
+                ? null
+                : () => widget.onYearTap!(visit.visitedFrom!.year),
           );
         },
       ),
@@ -87,6 +91,7 @@ class _TimelineStop extends StatelessWidget {
   final bool isLast;
   final bool showYear;
   final VoidCallback onTap;
+  final VoidCallback? onYearTap;
 
   const _TimelineStop({
     required this.visit,
@@ -94,6 +99,7 @@ class _TimelineStop extends StatelessWidget {
     required this.isLast,
     required this.showYear,
     required this.onTap,
+    required this.onYearTap,
   });
 
   @override
@@ -110,15 +116,32 @@ class _TimelineStop extends StatelessWidget {
           children: [
             // Only the first stop of each year gets a year label, so a
             // multi-year timeline stays legible without repeating it on
-            // every single stop.
+            // every single stop. Tapping it (separately from the stop
+            // itself) shares a recap card for that year.
             SizedBox(
               height: 14,
               child: showYear
-                  ? Text(
-                      DateFormat.y().format(visit.visitedFrom!),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+                  ? GestureDetector(
+                      onTap: onYearTap,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            DateFormat.y().format(visit.visitedFrom!),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          if (onYearTap != null) ...[
+                            const SizedBox(width: 2),
+                            Icon(
+                              Icons.ios_share,
+                              size: 10,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ],
+                        ],
                       ),
                     )
                   : null,

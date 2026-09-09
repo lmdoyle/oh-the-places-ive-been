@@ -9,10 +9,8 @@ class TripShareCard extends StatelessWidget {
 
   const TripShareCard({super.key, required this.visit});
 
-  static const maxCollagePhotos = 4;
-
   static List<String> collagePhotoUrls(Visit visit) {
-    return visit.photoUrls.take(maxCollagePhotos).toList();
+    return visit.photoUrls.take(PhotoCollage.maxPhotos).toList();
   }
 
   @override

@@ -23,15 +23,20 @@ class HorizontalTripTimeline extends StatefulWidget {
 
 class _HorizontalTripTimelineState extends State<HorizontalTripTimeline> {
   final _controller = ScrollController();
+  bool _hasJumpedToEnd = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Jump once the first frame has laid out and maxScrollExtent is known
-    // — jumping in initState itself would happen before that's available.
+  // The visits list starts out empty (the Firestore stream hasn't emitted
+  // yet), so build() returns a SizedBox with no ListView/controller
+  // attached — scheduling this only once in initState would frequently
+  // fire before the ListView ever existed, and never fire again once real
+  // data arrived. Calling this from every build (it's a no-op once
+  // _hasJumpedToEnd is set) means whichever build first actually attaches
+  // the controller is the one that performs the jump.
+  void _jumpToEndOnceReady() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_controller.hasClients) {
+      if (!_hasJumpedToEnd && _controller.hasClients) {
         _controller.jumpTo(_controller.position.maxScrollExtent);
+        _hasJumpedToEnd = true;
       }
     });
   }
@@ -49,8 +54,10 @@ class _HorizontalTripTimelineState extends State<HorizontalTripTimeline> {
 
     if (dated.isEmpty) return const SizedBox.shrink();
 
+    _jumpToEndOnceReady();
+
     return SizedBox(
-      height: 92,
+      height: 106,
       child: ListView.builder(
         controller: _controller,
         scrollDirection: Axis.horizontal,
@@ -58,10 +65,14 @@ class _HorizontalTripTimelineState extends State<HorizontalTripTimeline> {
         itemCount: dated.length,
         itemBuilder: (context, i) {
           final visit = dated[i];
+          final isNewYear =
+              i == 0 ||
+              dated[i - 1].visitedFrom!.year != visit.visitedFrom!.year;
           return _TimelineStop(
             visit: visit,
             isFirst: i == 0,
             isLast: i == dated.length - 1,
+            showYear: isNewYear,
             onTap: () => widget.onTap(visit),
           );
         },
@@ -74,12 +85,14 @@ class _TimelineStop extends StatelessWidget {
   final Visit visit;
   final bool isFirst;
   final bool isLast;
+  final bool showYear;
   final VoidCallback onTap;
 
   const _TimelineStop({
     required this.visit,
     required this.isFirst,
     required this.isLast,
+    required this.showYear,
     required this.onTap,
   });
 
@@ -95,6 +108,21 @@ class _TimelineStop extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Only the first stop of each year gets a year label, so a
+            // multi-year timeline stays legible without repeating it on
+            // every single stop.
+            SizedBox(
+              height: 14,
+              child: showYear
+                  ? Text(
+                      DateFormat.y().format(visit.visitedFrom!),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )
+                  : null,
+            ),
             Text(
               DateFormat.MMMd().format(visit.visitedFrom!),
               style: theme.textTheme.bodySmall,
